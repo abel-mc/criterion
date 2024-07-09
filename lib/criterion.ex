@@ -63,7 +63,7 @@ defmodule Criterion do
 
   defmacro step(description, step_var \\ Macro.escape(%{}), do: block) do
     quote do
-      def shared_step(unquote(description), unquote(step_var)) do
+      def step_(unquote(description), unquote(step_var)) do
         unquote(block)
       end
     end
@@ -133,7 +133,7 @@ defmodule Criterion do
        ) do
     quote do
       fn context ->
-        shared_step(unquote(step_description), context)
+        step_(unquote(step_description), context)
       end
     end
   end
