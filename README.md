@@ -1,21 +1,63 @@
-# Exepted
+# Criterion
 
-**TODO: Add description**
+A library to write ExUnit tests BDD style
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `exepted` to your list of dependencies in `mix.exs`:
+The package can be installed
+by adding `criterion` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:exepted, "~> 0.1.0"}
+    {:criterion, "~> 0.1.0", only: [:test]}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/exepted>.
+## Usage
 
+### Shared Steps
+
+```elixir
+defmodule Criterion.SharedSteps do
+  import Criterion
+
+  step "Given a number", _context do
+    %{number: :rand.uniform(100)}
+  end
+end
+```
+
+### Test
+
+```elixir
+defmodule CriterionTest do
+  use ExUnit.Case
+  import Criterion
+  import Criterion.SharedSteps
+
+  feature "Math" do
+    scenario "Square" do
+      step("Given a number")
+
+      step "When the number is multiplied by it self", %{number: number} do
+        result = number * number
+        %{result: result}
+      end
+
+      step "Then the result is greater than the number", %{result: result, number: number} do
+        assert result > number
+      end
+    end
+  end
+end
+```
+
+### Generating feature file
+
+```
+mix criterion.gen.features --dir <directory>
+```
+
+Feature files will be created under the provided directory or `features` folder by default.
