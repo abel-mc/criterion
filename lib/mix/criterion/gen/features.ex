@@ -13,6 +13,10 @@ defmodule Mix.Tasks.Criterion.Gen.Features do
   mix criterion.gen.features --dir <directory>
   ```
 
+  ### Options
+
+  - --dir - specify the directory to read feature files from. default is `test/features`
+
   The task will create the specified directory (default is `features`) and generate a `.feature` file for each test file
   in your project, converting the Criterion tests into Gherkin syntax.
   """
@@ -25,7 +29,7 @@ defmodule Mix.Tasks.Criterion.Gen.Features do
     {opts, _} = OptionParser.parse!(args, switches: @switches)
 
     # Define the directory where the feature files will be saved
-    feature_dir = opts[:dir] || "features"
+    feature_dir = opts[:dir] || "test/features"
     File.mkdir_p!(feature_dir)
 
     # Get all test files in the project
