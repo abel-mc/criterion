@@ -17,7 +17,7 @@ end
 
 ## Usage
 
-### Shared Steps
+### Shared steps
 
 ```elixir
 defmodule Criterion.SharedSteps do
@@ -54,17 +54,17 @@ defmodule CriterionTest do
 end
 ```
 
-### Generating feature filed
+### Generating feature files
 
 ```
-mix criterion.gen.features --dir <directory>
+mix criterion.gen.features
 ```
 
 #### Options
 
 - `--dir` - specify the directory to read feature files from. default is `test/features`
 
-### Generating tests 
+### Generating test files 
 
 ```
 mix criterion.gen.tests
