@@ -62,7 +62,7 @@ mix criterion.gen.features
 
 #### Options
 
-- `--dir` - specify the directory to read feature files from. default is `test/features`
+- `--output` - specify the directory to generate feature files in. default is `test/features`
 
 ### Generating test files 
 
