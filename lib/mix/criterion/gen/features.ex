@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Criterion.Gen.Features do
 
   ### Options
 
-  - --dir - specify the directory to read feature files from. default is `test/features`
+  - `--dir` - specify the directory to read feature files from. default is `test/features`
 
   The task will create the specified directory (default is `features`) and generate a `.feature` file for each test file
   in your project, converting the Criterion tests into Gherkin syntax.

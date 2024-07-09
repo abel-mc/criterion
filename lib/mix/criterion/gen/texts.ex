@@ -14,9 +14,9 @@ defmodule Mix.Tasks.Criterion.Gen.Tests do
 
   ### Options
 
-  - --dir - specify the directory to read feature files from. default is `test/features`
-  - --file - to generate test for a list of files
-  - --output - specify the directory to generate the test files in. default is `test/features`
+  - `--dir` - specify the directory to read feature files from. default is `test/features`
+  - `--file` - to generate test for a list of files
+  - `--output` - specify the directory to generate the test files in. default is `test/features`
   """
 
   @switches [dir: :string, file: :keep, output: :string]

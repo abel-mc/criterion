@@ -54,10 +54,24 @@ defmodule CriterionTest do
 end
 ```
 
-### Generating feature file
+### Generating feature filed
 
 ```
 mix criterion.gen.features --dir <directory>
 ```
 
-Feature files will be created under the provided directory or `features` folder by default.
+#### Options
+
+- `--dir` - specify the directory to read feature files from. default is `test/features`
+
+### Generating tests 
+
+```
+mix criterion.gen.tests
+```
+
+#### Options
+
+- `--dir` - specify the directory to read feature files from. default is `test/features`
+- `--file` - to generate test for a list of files
+- `--output` - specify the directory to generate the test files in. default is `test/features`
