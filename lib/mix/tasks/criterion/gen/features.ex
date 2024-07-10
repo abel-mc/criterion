@@ -15,28 +15,36 @@ defmodule Mix.Tasks.Criterion.Gen.Features do
 
   ### Options
 
+  - `--dir` - specify the directory to read test files from. default is `test`
+  - `--file` - to generate feature files for a list of test files
   - `--output` - specify the directory to generate feature files in. default is `test/features`
 
   The task will create the specified directory (default is `features`) and generate a `.feature` file for each test file
   in your project, converting the Criterion tests into Gherkin syntax.
   """
 
-  @switches [output: :string]
+  @switches [dir: :string, file: :keep, output: :string]
 
   def run(args) do
     Mix.Task.run("app.start")
 
     {opts, _} = OptionParser.parse!(args, switches: @switches)
 
-    # Define the directory where the feature files will be saved
-    feature_dir = opts[:output] || "test/features"
-    File.mkdir_p!(feature_dir)
+    test_dir = opts[:dir] || "test"
+    output_dir = opts[:output] || "test/features"
+    test_files = Keyword.get_values(opts, :file)
 
-    # Get all test files in the project
-    test_files = Path.wildcard("test/**/*_test.exs")
+    File.mkdir_p!(output_dir)
+
+    test_files =
+      if length(test_files) > 0 do
+        test_files
+      else
+        Path.wildcard("#{test_dir}/**/*_test.exs")
+      end
 
     Enum.each(test_files, fn file ->
-      generate_feature_file(file, feature_dir)
+      generate_feature_file(file, output_dir)
     end)
   end
 
@@ -65,13 +73,18 @@ defmodule Mix.Tasks.Criterion.Gen.Features do
     end)
   end
 
+  defp extract_features(_), do: []
+
   defp extract_scenarios(scenarios) do
     Enum.map(scenarios, fn
       {:scenario, _, [description, [do: {:__block__, _, steps}]]} ->
         {description, extract_steps(steps)}
 
-      _ ->
-        nil
+      {:scenario, _, [description, _context, [do: {:__block__, _, steps}]]} ->
+        {description, extract_steps(steps)}
+
+      other ->
+        dbg(other)
     end)
     |> Enum.reject(&is_nil/1)
   end
@@ -87,7 +100,8 @@ defmodule Mix.Tasks.Criterion.Gen.Features do
       {:step, _, [description]} ->
         {:step, description}
 
-      _ ->
+      other ->
+        dbg(other)
         nil
     end)
     |> Enum.reject(&is_nil/1)

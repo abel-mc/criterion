@@ -16,7 +16,7 @@ defmodule Mix.Tasks.Criterion.Gen.Tests do
 
   - `--dir` - specify the directory to read feature files from. default is `test/features`
   - `--file` - to generate test for a list of files
-  - `--output` - specify the directory to generate the test files in. default is `test/features`
+  - `--output` - specify the directory to generate the test files in. default is `test`
   """
 
   @switches [dir: :string, file: :keep, output: :string]
@@ -24,7 +24,7 @@ defmodule Mix.Tasks.Criterion.Gen.Tests do
     {opts, _} = OptionParser.parse!(args, switches: @switches)
 
     feature_dir = opts[:dir] || "test/features"
-    output_dir = opts[:output] || "test/features"
+    output_dir = opts[:output] || "test"
     feature_files = Keyword.get_values(opts, :file)
 
     feature_files =

@@ -62,6 +62,8 @@ mix criterion.gen.features
 
 #### Options
 
+- `--dir` - specify the directory to read test files from. default is `test`
+- `--file` - to generate feature files for a list of test files
 - `--output` - specify the directory to generate feature files in. default is `test/features`
 
 ### Generating test files 
@@ -74,4 +76,4 @@ mix criterion.gen.tests
 
 - `--dir` - specify the directory to read feature files from. default is `test/features`
 - `--file` - to generate test for a list of files
-- `--output` - specify the directory to generate the test files in. default is `test/features`
+- `--output` - specify the directory to generate the test files in. default is `test`
