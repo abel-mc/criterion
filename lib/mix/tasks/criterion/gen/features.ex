@@ -83,25 +83,18 @@ defmodule Mix.Tasks.Criterion.Gen.Features do
       {:scenario, _, [description, _context, [do: {:__block__, _, steps}]]} ->
         {description, extract_steps(steps)}
 
-      other ->
-        dbg(other)
+      _ ->
+        nil
     end)
     |> Enum.reject(&is_nil/1)
   end
 
   defp extract_steps(steps) do
     Enum.map(steps, fn
-      {:step, _, [description, [do: _]]} ->
+      {:step, _, [description | _other]} when is_binary(description) ->
         {:step, description}
 
-      {:step, _, [description, _context, [do: _]]} ->
-        {:step, description}
-
-      {:step, _, [description]} ->
-        {:step, description}
-
-      other ->
-        dbg(other)
+      _ ->
         nil
     end)
     |> Enum.reject(&is_nil/1)
@@ -109,7 +102,7 @@ defmodule Mix.Tasks.Criterion.Gen.Features do
 
   defp format_feature(feature_name, scenarios) do
     """
-    Feature: #{String.capitalize(feature_name)}
+    Feature: #{capitalize(feature_name)}
 
     #{Enum.map_join(scenarios, "\n", &format_scenario/1)}
     """
@@ -117,19 +110,24 @@ defmodule Mix.Tasks.Criterion.Gen.Features do
 
   defp format_scenario({scenario_name, steps}) do
     """
-    \tScenario: #{String.capitalize(scenario_name)}
+    \tScenario: #{capitalize(scenario_name)}
     #{Enum.map_join(steps, "\n", &format_step/1)}
     """
   end
 
   defp format_step({:step, description}) do
-    "\t\t#{String.capitalize(description)}"
+    "\t\t#{capitalize(description)}"
   end
 
   defp to_camel_case(string) do
     string
     |> String.split()
-    |> Enum.map(&String.capitalize/1)
+    |> Enum.map(&capitalize/1)
     |> Enum.join("")
+  end
+
+  defp capitalize(string) do
+    [h | t] = String.graphemes(string)
+    Enum.join([String.capitalize(h) | t])
   end
 end

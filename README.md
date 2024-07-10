@@ -35,11 +35,11 @@ end
 defmodule CriterionTest do
   use ExUnit.Case
   import Criterion
-  import Criterion.SharedSteps
+  alias Criterion.SharedSteps
 
   feature "Math" do
     scenario "Square" do
-      step("Given a number")
+      step("Given a number", SharedSteps)
 
       step "When the number is multiplied by it self", %{number: number} do
         result = number * number
@@ -66,7 +66,7 @@ mix criterion.gen.features
 - `--file` - to generate feature files for a list of test files
 - `--output` - specify the directory to generate feature files in. default is `test/features`
 
-### Generating test files 
+### Generating test files
 
 ```
 mix criterion.gen.tests

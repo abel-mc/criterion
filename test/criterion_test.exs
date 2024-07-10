@@ -1,11 +1,11 @@
 defmodule CriterionTest do
   use ExUnit.Case
   import Criterion
-  import Criterion.SharedSteps
+  alias Criterion.SharedSteps
 
   feature "Math" do
     scenario "Square" do
-      step("Given a number")
+      step("Given a number", SharedSteps)
 
       step "When the number is multiplied by it self", %{number: number} do
         result = number * number
@@ -18,7 +18,7 @@ defmodule CriterionTest do
     end
 
     scenario "Divide" do
-      step("Given a number")
+      step("Given a number", SharedSteps)
 
       step "When the number divided by it self", %{number: number} do
         result = number / number

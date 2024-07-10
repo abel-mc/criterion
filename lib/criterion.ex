@@ -63,7 +63,7 @@ defmodule Criterion do
 
   defmacro step(description, step_var \\ Macro.escape(%{}), do: block) do
     quote do
-      def step_(unquote(description), unquote(step_var)) do
+      def step(unquote(description), unquote(step_var)) do
         unquote(block)
       end
     end
@@ -128,12 +128,23 @@ defmodule Criterion do
   end
 
   defp extract_step(
+         {:step, _line, [step_description, {:__aliases__, _, [_]} = alias_module]},
+         _scenario_description
+       ) do
+    quote do
+      fn context ->
+        unquote(alias_module).step(unquote(step_description), context)
+      end
+    end
+  end
+
+  defp extract_step(
          {:step, _line, [step_description]},
          _scenario_description
        ) do
     quote do
       fn context ->
-        step_(unquote(step_description), context)
+        step(unquote(step_description), context)
       end
     end
   end
