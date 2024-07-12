@@ -16,7 +16,7 @@ defmodule Mix.Tasks.Criterion.Gen.Tests do
 
   - `--dir` - specify the directory to read feature files from. default is `test/features`
   - `--file` - to generate test for a list of files
-  - `--output` - specify the directory to generate the test files in. default is `test`
+  - `--output` - specify the directory to generate the test files in. default is `test/features`
   """
 
   @switches [dir: :string, file: :keep, output: :string]
@@ -24,7 +24,7 @@ defmodule Mix.Tasks.Criterion.Gen.Tests do
     {opts, _} = OptionParser.parse!(args, switches: @switches)
 
     feature_dir = opts[:dir] || "test/features"
-    output_dir = opts[:output] || "test"
+    output_dir = opts[:output] || "test/features"
     feature_files = Keyword.get_values(opts, :file)
 
     feature_files =
@@ -51,11 +51,28 @@ defmodule Mix.Tasks.Criterion.Gen.Tests do
   end
 
   defp parse_feature_file(content) do
-    [feature_line | scenario_lines] = String.split(content, "\n", trim: true)
+    [feature_line | scenario_lines] =
+      String.split(content, "\n", trim: true) |> Enum.map(&String.trim(&1, "\t"))
+
     feature_name = String.trim_leading(feature_line, "Feature: ")
 
     scenarios =
-      Enum.chunk_by(scenario_lines, &String.starts_with?(&1, "Scenario: "))
+      scenario_lines
+      |> Enum.chunk_while(
+        nil,
+        fn line, acc ->
+          if String.starts_with?(line, "Scenario:") do
+            if acc do
+              {:cont, acc, [line]}
+            else
+              {:cont, [line]}
+            end
+          else
+            {:cont, acc ++ [line]}
+          end
+        end,
+        fn acc -> {:cont, acc, []} end
+      )
       |> Enum.map(fn [scenario_line | step_lines] ->
         scenario_name = String.trim_leading(scenario_line, "Scenario: ")
         steps = Enum.map(step_lines, &String.trim(&1))

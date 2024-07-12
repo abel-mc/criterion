@@ -76,4 +76,4 @@ mix criterion.gen.tests
 
 - `--dir` - specify the directory to read feature files from. default is `test/features`
 - `--file` - to generate test for a list of files
-- `--output` - specify the directory to generate the test files in. default is `test`
+- `--output` - specify the directory to generate the test files in. default is `test/features`
