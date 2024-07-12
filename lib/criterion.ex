@@ -6,35 +6,48 @@ defmodule Criterion do
 
   ## Usage
 
-  1. Define scenarios using the `scenario/2` macro.
-  2. Inside each scenario, define steps using the `step/2` macro.
-  3. Steps can be either plain steps or steps with context variables.
-  4. Shared steps can be defined external to the scenario
+  1. Define a feature using `feature/2` macro
+  2. Define scenarios under the feature using the `scenario/3` macro.
+  2. Inside each scenario, define steps using the `step/3` macro.
+  3. Steps can be either plain steps, steps with context variables or shared step
+  4. Shared steps can be defined using `defstep/4` macro
 
   ## Example
 
-
+  ### Shared steps
 
   ```elixir
-  # Define a scenario
-  step "Shared", context do
-    context
-  end
+  defmodule Criterion.SharedSteps do
+    import Criterion
 
-  scenario "Adding numbers" do
-    # Use a shared step
-    step "Shared"
-    # Define a step
-    step "Addition" do
-      assert 1 + 1 == 2
+    defstep "Given a number", _context, args do
+      min = args[:min] || 0
+      %{number: min + :rand.uniform(100)}
     end
+  end
+  ```
 
+  ### Test
 
+  ```elixir
+  defmodule CriterionTest do
+    use ExUnit.Case
+    import Criterion
+    alias Criterion.SharedSteps
 
-    # Define a step with context
-    step "Addition with context", context do
-      result = context[:a] + context[:b]
-      assert result == 5
+    feature "Math" do
+      scenario "Square" do
+        step "Given a number", from: SharedSteps, where: [min: 2]
+
+        step "When the number is multiplied by it self", %{number: number} do
+          result = number * number
+          %{result: result}
+        end
+
+        step "Then the result is greater than the number", %{result: result, number: number} do
+          assert result > number
+        end
+      end
     end
   end
   ```
