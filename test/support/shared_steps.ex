@@ -1,7 +1,8 @@
 defmodule Criterion.SharedSteps do
   import Criterion
 
-  step "Given a number", _context do
-    %{number: :rand.uniform(100)}
+  defstep "Given a number", _context, args do
+    min = args[:min] || 0
+    %{number: min + :rand.uniform(100)}
   end
 end

@@ -5,7 +5,7 @@ defmodule CriterionTest do
 
   feature "Math" do
     scenario "Square" do
-      step("Given a number", SharedSteps)
+      step "Given a number", from: SharedSteps, where: [min: 100]
 
       step "When the number is multiplied by it self", %{number: number} do
         result = number * number
@@ -18,7 +18,7 @@ defmodule CriterionTest do
     end
 
     scenario "Divide" do
-      step("Given a number", SharedSteps)
+      step "Given a number", from: SharedSteps
 
       step "When the number divided by it self", %{number: number} do
         result = number / number

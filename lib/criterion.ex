@@ -61,9 +61,9 @@ defmodule Criterion do
     end
   end
 
-  defmacro step(description, step_var \\ Macro.escape(%{}), do: block) do
+  defmacro defstep(description, step_var, where_var, do: block) do
     quote do
-      def step(unquote(description), unquote(step_var)) do
+      def step(unquote(description), unquote(step_var), unquote(where_var)) do
         unquote(block)
       end
     end
@@ -128,23 +128,20 @@ defmodule Criterion do
   end
 
   defp extract_step(
-         {:step, _line, [step_description, {:__aliases__, _, [_]} = alias_module]},
+         {:step, _line, [step_description | opts]},
          _scenario_description
        ) do
-    quote do
-      fn context ->
-        unquote(alias_module).step(unquote(step_description), context)
-      end
-    end
-  end
+    opts = List.flatten(opts)
+    from = opts[:from]
+    where = opts[:where]
 
-  defp extract_step(
-         {:step, _line, [step_description]},
-         _scenario_description
-       ) do
-    quote do
-      fn context ->
-        step(unquote(step_description), context)
+    if from do
+      quote do
+        fn context -> unquote(from).step(unquote(step_description), context, unquote(where)) end
+      end
+    else
+      quote do
+        fn context -> step(unquote(step_description), context, unquote(where)) end
       end
     end
   end
