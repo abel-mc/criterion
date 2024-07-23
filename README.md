@@ -62,10 +62,10 @@ defmodule CriterionTest do
     end
 
     scenario "Square" do
-      step("Given a number greater than 5",
+      step("Given a number greater than 1",
         from: SharedSteps, # use only if the reusable step is in another module
         via: "Given a number" # use only if the reusable step has a different step name,
-        where: [min: 5] # use only when you want to pass arguments to the reusable step,
+        where: [min: 2] # use only when you want to pass arguments to the reusable step,
       )
 
       step "When the number is multiplied by it self", %{number: number} do
