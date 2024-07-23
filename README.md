@@ -40,7 +40,7 @@ defmodule CriterionTest do
 
   feature "Math" do
     setup do
-      {:ok, pi: 2.7}
+      {:ok, pi: 3.14}
     end
 
     scenario "Square" do
@@ -61,7 +61,7 @@ defmodule CriterionTest do
 
       # you can access data from the initial context of the test
       step "And pi is a constant", %{pi: pi} do
-        assert pi == 2.7
+        assert pi == 3.14
       end
     end
   end

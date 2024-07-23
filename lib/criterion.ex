@@ -5,8 +5,8 @@ defmodule Criterion do
   ## Usage
 
   1. Define a feature using `feature/2` macro
-  2. Define scenarios under the feature using the `scenario/3` macro.
-  3. Inside each scenario, define steps using the `step/2` macro.
+  2. Define scenarios under the feature using the `scenario/2` macro.
+  3. Inside each scenario, define steps using `step/2` block.
   4. Steps can be either plain steps, steps with context variables or shared step
   5. Shared steps can be defined using `defstep/4` macro
 
@@ -35,7 +35,7 @@ defmodule Criterion do
 
     feature "Math" do
       setup do
-        {:ok, pi: 2.7}
+        {:ok, pi: 3.14}
       end
 
       scenario "Square" do
@@ -56,7 +56,7 @@ defmodule Criterion do
 
         # you can access data from the initial context of the test
         step "And pi is a constant", %{pi: pi} do
-          assert pi == 2.7
+          assert pi == 3.14
         end
       end
     end
