@@ -1,6 +1,4 @@
 defmodule Criterion do
-  require Logger
-
   @moduledoc """
   A frame work to write unit tests as a list of steps. It can be used to write tests BDD style.
 
@@ -53,6 +51,10 @@ defmodule Criterion do
   ```
   """
 
+  require Logger
+
+  @context_var quote(do: context)
+
   defmacro feature(description, do: block) do
     quote do
       describe unquote(description) do
@@ -61,13 +63,12 @@ defmodule Criterion do
     end
   end
 
-  defmacro scenario(description, test_vars \\ Macro.escape(%{}), do: block) do
+  defmacro scenario(description, do: block) do
     steps = extract_steps(block, description)
 
     quote do
-      test unquote(description), unquote(test_vars) do
+      test unquote(description), unquote(@context_var) do
         require Logger
-
         unquote(steps)
         :ok
       end
@@ -83,7 +84,7 @@ defmodule Criterion do
   end
 
   defp extract_steps({:__block__, _, steps}, scenario_description) do
-    Enum.reduce(steps, quote(do: %{}), fn step, acc ->
+    Enum.reduce(steps, @context_var, fn step, acc ->
       step_code = extract_step(step, scenario_description)
 
       quote do

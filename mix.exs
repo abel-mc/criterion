@@ -4,8 +4,8 @@ defmodule Criterion.MixProject do
   def project do
     [
       app: :criterion,
-      version: "0.1.9",
-      elixir: "~> 1.16-rc",
+      version: "0.1.10",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: "A library to write tests bdd style.",
