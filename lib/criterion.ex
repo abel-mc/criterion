@@ -6,9 +6,9 @@ defmodule Criterion do
 
   1. Define a feature using `feature/2` macro
   2. Define scenarios under the feature using the `scenario/3` macro.
-  2. Inside each scenario, define steps using the `step/3` macro.
-  3. Steps can be either plain steps, steps with context variables or shared step
-  4. Shared steps can be defined using `defstep/4` macro
+  3. Inside each scenario, define steps using the `step/2` macro.
+  4. Steps can be either plain steps, steps with context variables or shared step
+  5. Shared steps can be defined using `defstep/4` macro
 
   ## Example
 
@@ -20,7 +20,7 @@ defmodule Criterion do
 
     defstep "Given a number", _context, args do
       min = args[:min] || 0
-      %{number: min + :rand.uniform(100)}
+      %{number: min + Enum.random(0..100)}
     end
   end
   ```
@@ -34,16 +34,29 @@ defmodule Criterion do
     alias Criterion.SharedSteps
 
     feature "Math" do
+      setup do
+        {:ok, pi: 2.7}
+      end
+
       scenario "Square" do
-        step "Given a number", from: SharedSteps, where: [min: 2]
+        step("Given a number greater than 5",
+          from: SharedSteps, # use only if the reusable step is in another module
+          via: "Given a number" # use only if the reusable step has a different step name,
+          where: [min: 5] # use only when you want to pass arguments to the reusable step,
+        )
 
         step "When the number is multiplied by it self", %{number: number} do
           result = number * number
-          %{result: result}
+          %{result: result} # will be merged to the test context
         end
 
         step "Then the result is greater than the number", %{result: result, number: number} do
           assert result > number
+        end
+
+        # you can access data from the initial context of the test
+        step "And pi is a constant", %{pi: pi} do
+          assert pi == 2.7
         end
       end
     end
@@ -148,10 +161,14 @@ defmodule Criterion do
     opts = List.flatten(opts)
     from = opts[:from]
     where = opts[:where]
+    via = opts[:via]
+    step_description = via || step_description
 
     if from do
       quote do
-        fn context -> unquote(from).step(unquote(step_description), context, unquote(where)) end
+        fn context ->
+          unquote(from).step(unquote(step_description), context, unquote(where))
+        end
       end
     else
       quote do

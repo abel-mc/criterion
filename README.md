@@ -10,7 +10,7 @@ by adding `criterion` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:criterion, "~> 0.1.0", only: [:test]}
+    {:criterion, "~> 0.1.0", only: [:test, :dev]}
   ]
 end
 ```
@@ -25,7 +25,7 @@ defmodule Criterion.SharedSteps do
 
   defstep "Given a number", _context, args do
     min = args[:min] || 0
-    %{number: min + :rand.uniform(100)}
+    %{number: min + Enum.random(0..100)}
   end
 end
 ```
@@ -39,16 +39,29 @@ defmodule CriterionTest do
   alias Criterion.SharedSteps
 
   feature "Math" do
+    setup do
+      {:ok, pi: 2.7}
+    end
+
     scenario "Square" do
-      step "Given a number", from: SharedSteps, where: [min: 2]
+      step("Given a number greater than 5",
+        from: SharedSteps, # use only if the reusable step is in another module
+        via: "Given a number" # use only if the reusable step has a different step name,
+        where: [min: 5] # use only when you want to pass arguments to the reusable step,
+      )
 
       step "When the number is multiplied by it self", %{number: number} do
         result = number * number
-        %{result: result}
+        %{result: result} # will be merged to the test context
       end
 
       step "Then the result is greater than the number", %{result: result, number: number} do
         assert result > number
+      end
+
+      # you can access data from the initial context of the test
+      step "And pi is a constant", %{pi: pi} do
+        assert pi == 2.7
       end
     end
   end
