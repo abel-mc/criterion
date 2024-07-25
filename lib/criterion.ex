@@ -156,7 +156,7 @@ defmodule Criterion do
 
   defp extract_step(
          {:step, _line, [step_description | opts]},
-         _scenario_description
+         scenario_description
        ) do
     opts = List.flatten(opts)
     from = opts[:from]
@@ -167,12 +167,32 @@ defmodule Criterion do
     if from do
       quote do
         fn context ->
-          unquote(from).step(unquote(step_description), context, unquote(where))
+          try do
+            unquote(from).step(unquote(step_description), context, unquote(where))
+          rescue
+            e ->
+              Logger.error(
+                "Test failed for Scenario: #{unquote(scenario_description)}, Step: #{unquote(step_description)}"
+              )
+
+              raise e
+          end
         end
       end
     else
       quote do
-        fn context -> step(unquote(step_description), context, unquote(where)) end
+        fn context ->
+          try do
+            step(unquote(step_description), context, unquote(where))
+          rescue
+            e ->
+              Logger.error(
+                "Test failed for Scenario: #{unquote(scenario_description)}, Step: #{unquote(step_description)}"
+              )
+
+              raise e
+          end
+        end
       end
     end
   end
