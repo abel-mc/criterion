@@ -63,6 +63,7 @@ defmodule Criterion do
   end
   ```
   """
+  alias Criterion.Reporter.Store
 
   require Logger
 
@@ -82,8 +83,15 @@ defmodule Criterion do
     quote do
       test unquote(description), unquote(@context_var) do
         require Logger
+
         unquote(steps)
-        :ok
+        |> case do
+          {:error, e, _} ->
+            raise e
+
+          _ ->
+            :ok
+        end
       end
     end
   end
@@ -97,66 +105,82 @@ defmodule Criterion do
   end
 
   defp extract_steps({:__block__, _, steps}, scenario_description) do
-    Enum.reduce(steps, @context_var, fn step, acc ->
-      step_code = extract_step(step, scenario_description)
+    steps
+    |> Enum.reduce(
+      @context_var,
+      fn
+        {:step, _line, [step_description | _]} = step, acc ->
+          step_code = extract_step(step, scenario_description)
 
-      quote do
-        context = unquote(acc)
-        result = unquote(step_code).(context)
+          quote do
+            case unquote(acc) do
+              {:error, e, context} ->
+                Store.add_step(
+                  {context.describe, unquote(scenario_description), unquote(step_description),
+                   :not_reached}
+                )
 
-        if is_map(result) do
-          Map.merge(context, result)
-        else
-          context
-        end
+                {:error, e, context}
+
+              context ->
+                try do
+                  result = unquote(step_code).(context)
+
+                  Store.add_step(
+                    {context.describe, unquote(scenario_description), unquote(step_description),
+                     :passed}
+                  )
+
+                  if is_map(result) do
+                    Map.merge(context, result)
+                  else
+                    context
+                  end
+                rescue
+                  e ->
+                    Logger.error(
+                      "Test failed for Scenario: #{unquote(scenario_description)}, Step: #{unquote(step_description)}"
+                    )
+
+                    Store.add_step(
+                      {context.describe, unquote(scenario_description), unquote(step_description),
+                       :failed}
+                    )
+
+                    {:error, e, context}
+                end
+            end
+          end
       end
-    end)
+    )
   end
 
   defp extract_step(
-         {:step, _line, [step_description, [do: block]]},
-         scenario_description
+         {:step, _line, [_step_description, [do: block]]},
+         _scenario_description
        ) do
     quote do
       fn context ->
-        try do
-          unquote(block)
-        rescue
-          e ->
-            Logger.error(
-              "Test failed for Scenario: #{unquote(scenario_description)}, Step: #{unquote(step_description)}"
-            )
-
-            raise e
-        end
+        unquote(block)
       end
     end
   end
 
   defp extract_step(
-         {:step, _line, [step_description, context_var, [do: block]]},
-         scenario_description
+         {:step, _line, [_step_description, context_var, [do: block]]},
+         _scenario_description
        ) do
     quote do
       fn context ->
-        try do
-          unquote(context_var) = context
-          unquote(block)
-        rescue
-          e ->
-            Logger.error(
-              "Test failed for Scenario: #{unquote(scenario_description)}, Step: #{unquote(step_description)}"
-            )
-
-            raise e
-        end
+        unquote(context_var) = context
+        unquote(block)
       end
     end
   end
 
   defp extract_step(
          {:step, _line, [step_description | opts]},
-         scenario_description
+         _scenario_description
        ) do
     opts = List.flatten(opts)
     from = opts[:from]
@@ -167,31 +191,13 @@ defmodule Criterion do
     if from do
       quote do
         fn context ->
-          try do
-            unquote(from).step(unquote(step_description), context, unquote(where))
-          rescue
-            e ->
-              Logger.error(
-                "Test failed for Scenario: #{unquote(scenario_description)}, Step: #{unquote(step_description)}"
-              )
-
-              raise e
-          end
+          unquote(from).step(unquote(step_description), context, unquote(where))
         end
       end
     else
       quote do
         fn context ->
-          try do
-            step(unquote(step_description), context, unquote(where))
-          rescue
-            e ->
-              Logger.error(
-                "Test failed for Scenario: #{unquote(scenario_description)}, Step: #{unquote(step_description)}"
-              )
-
-              raise e
-          end
+          step(unquote(step_description), context, unquote(where))
         end
       end
     end
