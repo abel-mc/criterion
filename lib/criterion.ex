@@ -139,7 +139,7 @@ defmodule Criterion do
                 rescue
                   e ->
                     Logger.error(
-                      "Test failed for Scenario: #{unquote(scenario_description)}, Step: #{unquote(step_description)}"
+                      "Test failed for \nScenario: #{unquote(scenario_description)}, \nStep: #{unquote(step_description)} \nException: #{Exception.format(:error, e, __STACKTRACE__)}"
                     )
 
                     Store.add_step(

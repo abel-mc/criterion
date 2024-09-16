@@ -40,7 +40,7 @@ defmodule Criterion.Reporter do
       <style>
         body {
           font-family: Arial, sans-serif;
-          background-color: #f8f9fa;
+          background-color: #ffffff;
           margin: 20px;
         }
 
@@ -50,33 +50,35 @@ defmodule Criterion.Reporter do
           padding-bottom: 5px;
         }
 
-        h2 {
-          color: #666;
-          margin-top: 20px;
+        h2, h3 {
+          color: blue;
         }
 
-        h3 {
-          color: #888;
-          margin-top: 15px;
+        h2 span, h3 span {
+          color: #A52A2A;
         }
 
-        .scenario {
-          padding-left: 20px;
+        .step-keyword {
+          color: blue;
         }
 
-        .step.pass {
+        .step-text {
+          color: black;
+        }
+
+        .step.pass::before {
+          content: "✅ ";
           color: green;
-          font-weight: bold;
         }
 
-        .step.fail {
+        .step.fail::before {
+          content: "❌ ";
           color: red;
-          font-weight: bold;
         }
 
-        .step.not_reached {
+        .step.not_reached::before {
+          content: "⏸️ ";
           color: gray;
-          font-style: italic;
         }
 
         .feature-container {
@@ -98,7 +100,7 @@ defmodule Criterion.Reporter do
       </style>
     </head>
     <body>
-      <h1>Test Report</h1>
+      <h1>Criterion Test Report</h1>
 
       #{Enum.map_join(features, "\n", &format_feature/1)}
 
@@ -113,7 +115,7 @@ defmodule Criterion.Reporter do
   defp format_feature({feature_name, scenarios}) do
     """
     <div class="feature-container">
-      <h2>Feature: #{feature_name}</h2>
+      <h2>Feature: <span>#{feature_name}</span></h2>
       #{Enum.map_join(scenarios, "\n", &format_scenario/1)}
     </div>
     """
@@ -122,7 +124,7 @@ defmodule Criterion.Reporter do
   defp format_scenario({scenario_name, steps}) do
     """
     <div class="scenario">
-      <h3>Scenario: #{scenario_name}</h3>
+      <h3>Scenario: <span>#{scenario_name}</span></h3>
       <ul class="step-container">
         #{Enum.map_join(steps, "\n", &format_step/1)}
       </ul>
@@ -131,6 +133,13 @@ defmodule Criterion.Reporter do
   end
 
   defp format_step({description, status}) do
+    step_keyword_regex = ~r/^(Given|When|Then|And)\b/
+
+    # Highlight the Gherkin keywords (e.g., Given, When, Then, And) in blue.
+    description_html =
+      Regex.replace(step_keyword_regex, description, "<span class='step-keyword'>\\1</span>") <>
+        "<span class='step-text'>#{String.replace(description, step_keyword_regex, "")}</span>"
+
     step_class =
       case status do
         :passed -> "pass"
@@ -138,6 +147,6 @@ defmodule Criterion.Reporter do
         :not_reached -> "not_reached"
       end
 
-    "<li class=\"step #{step_class}\">#{description}</li>"
+    "<li class=\"step #{step_class}\">#{description_html}</li>"
   end
 end
