@@ -29,6 +29,12 @@ defmodule Criterion.Reporter do
            fn {_feature, _scenario, step, status} -> {step, status} end
          )}
       end)
+      |> Enum.sort_by(fn {feature_name, _scenarios} -> feature_name end)
+      |> Enum.map(fn {feature_name, scenarios} ->
+        {feature_name,
+         scenarios
+         |> Enum.sort_by(fn {scenario_name, _steps} -> scenario_name end)}
+      end)
 
     html_content = """
     <!DOCTYPE html>
