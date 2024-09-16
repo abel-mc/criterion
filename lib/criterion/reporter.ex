@@ -133,12 +133,22 @@ defmodule Criterion.Reporter do
   end
 
   defp format_step({description, status}) do
-    step_keyword_regex = ~r/^(Given|When|Then|And)\b/
+    step_keyword_regex = ~r/^(Given|When|Then|And)/
 
-    # Highlight the Gherkin keywords (e.g., Given, When, Then, And) in blue.
+    # Extract and highlight the Gherkin keyword.
+    [keyword, step_text] =
+      case Regex.split(step_keyword_regex, description, include_captures: true, trim: true) do
+        [keyword, rest] -> [keyword, rest]
+        _ -> ["", description]
+      end
+
     description_html =
-      Regex.replace(step_keyword_regex, description, "<span class='step-keyword'>\\1</span>") <>
-        "<span class='step-text'>#{String.replace(description, step_keyword_regex, "")}</span>"
+      if keyword != "" do
+        "<span class='step-keyword'>#{keyword}</span> " <>
+          "<span class='step-text'>#{step_text}</span>"
+      else
+        "<span class='step-text'>#{description}</span>"
+      end
 
     step_class =
       case status do
