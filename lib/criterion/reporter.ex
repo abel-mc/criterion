@@ -55,7 +55,7 @@ defmodule Criterion.Reporter do
         }
 
         h2 span, h3 span {
-          color: #A52A2A;
+          color: #333333;
         }
 
         .step-keyword {
@@ -63,7 +63,7 @@ defmodule Criterion.Reporter do
         }
 
         .step-text {
-          color: black;
+          color: #333333;
         }
 
         .step.pass::before {
