@@ -8,7 +8,7 @@ defmodule Criterion do
   - Define scenarios under the feature using the `scenario/2` macro.
   - Inside each scenario, define steps using `step/2` block.
   - Steps can have either inline or external implementation.
-  - External implementations allows reusability and can be defined using `defstep/2` macro.
+  - External implementations can be reused and can be defined using `defstep/2` macro.
 
   ## Example
 

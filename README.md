@@ -21,7 +21,7 @@ end
 - Define scenarios under the feature using the `scenario/2` macro.
 - Inside each scenario, define steps using `step/2` block.
 - Steps can have either inline or external implementation.
-- External implementations allows reusability and can be defined using `defstep/2` macro.
+- External implementations can be reused and can be defined using `defstep/2` macro.
 
 ## Example
 
@@ -83,11 +83,11 @@ mix criterion.gen.features
 ```feature
 Feature: Math
 
-	Scenario: Square
-		Given a number greater than 1
-		When the number is multiplied by it self
-		Then the result is greater than the number
-		And pi is a constant
+  Scenario: Square
+    Given a number greater than 1
+    When the number is multiplied by it self
+    Then the result is greater than the number
+    And pi is a constant
 ```
 
 ### Generating test files
@@ -106,23 +106,23 @@ mix criterion.gen.tests
 
 ```elixir
 defmodule MathTest do
-	use ExUnit.Case
-	import Criterion
+  use ExUnit.Case
+  import Criterion
 
-	feature "Math" do
-		scenario "Square" do
-			step "Given a number greater than 1" do
-			end
+  feature "Math" do
+    scenario "Square" do
+      step "Given a number greater than 1" do
+      end
 
-			step "When the number is multiplied by it self" do
-			end
+      step "When the number is multiplied by it self" do
+      end
 
-			step "Then the result is greater than the number" do
-			end
+      step "Then the result is greater than the number" do
+      end
 
-			step "And pi is a constant" do
-			end
-		end
-	end
+      step "And pi is a constant" do
+      end
+    end
+  end
 end
 ```
