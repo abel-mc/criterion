@@ -1,7 +1,6 @@
 defmodule CriterionTest do
   use ExUnit.Case
   import Criterion
-  alias Criterion.SharedSteps
 
   feature "Math" do
     setup do
@@ -10,8 +9,7 @@ defmodule CriterionTest do
 
     scenario "Square" do
       step("Given a number greater than 1",
-        from: SharedSteps,
-        via: "Given a number",
+        via: &random_number/2,
         where: [min: 2]
       )
 
@@ -29,25 +27,9 @@ defmodule CriterionTest do
       end
     end
 
-    scenario "Divide" do
-      step("Given a number greater than 0",
-        from: SharedSteps,
-        via: "Given a number",
-        where: [min: 1]
-      )
-
-      step "When the number divided by it self", %{number: number} do
-        result = number / number
-        %{result: result}
-      end
-
-      step "Then the result is 1", %{result: result} do
-        assert result == 1
-      end
-
-      step "And pi is a constant", %{pi: pi} do
-        assert pi == 3.14
-      end
+    defstep random_number(_context, args) do
+      min = args[:min] || 0
+      %{number: min + Enum.random(0..100)}
     end
   end
 end

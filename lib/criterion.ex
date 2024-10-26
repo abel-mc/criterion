@@ -1,37 +1,21 @@
 defmodule Criterion do
   @moduledoc """
-  A frame work to write unit tests as a list of steps. It can be used to write tests BDD style.
+  A framework to write unit tests as a list of steps. It can be used to write tests in a BDD style.
 
   ## Usage
 
-  1. Define a feature using `feature/2` macro
-  2. Define scenarios under the feature using the `scenario/2` macro.
-  3. Inside each scenario, define steps using `step/2` block.
-  4. Steps can be either plain steps, steps with context variables or shared step
-  5. Shared steps can be defined using `defstep/4` macro
+  - Define a feature using `feature/2` macro
+  - Define scenarios under the feature using the `scenario/2` macro.
+  - Inside each scenario, define steps using `step/2` block.
+  - Steps can have either inline or external implementation.
+  - External implementations allows reusability and can be defined using `defstep/2` macro.
 
   ## Example
-
-  ### Shared steps
-
-  ```elixir
-  defmodule Criterion.SharedSteps do
-    import Criterion
-
-    defstep "Given a number", _context, args do
-      min = args[:min] || 0
-      %{number: min + Enum.random(0..100)}
-    end
-  end
-  ```
-
-  ### Test
 
   ```elixir
   defmodule CriterionTest do
     use ExUnit.Case
     import Criterion
-    alias Criterion.SharedSteps
 
     feature "Math" do
       setup do
@@ -39,12 +23,13 @@ defmodule Criterion do
       end
 
       scenario "Square" do
+        # Step with external implementation
         step("Given a number greater than 5",
-          from: SharedSteps, # use only if the reusable step is in another module
-          via: "Given a number" # use only if the reusable step has a different step name,
-          where: [min: 5] # use only when you want to pass arguments to the reusable step,
+          via: &random_number/2,
+          where: [min: 2] # Options passed as second argument to the function
         )
 
+        # Step with inline implementation
         step "When the number is multiplied by it self", %{number: number} do
           result = number * number
           %{result: result} # will be merged to the test context
@@ -54,10 +39,16 @@ defmodule Criterion do
           assert result > number
         end
 
-        # you can access data from the initial context of the test
+        # You can access data from the initial context of the test
         step "And pi is a constant", %{pi: pi} do
           assert pi == 3.14
         end
+      end
+
+      # External step implementation
+      defstep random_number(_context, args) do
+        min = args[:min] || 0
+        %{number: min + Enum.random(0..100)}
       end
     end
   end
@@ -96,9 +87,9 @@ defmodule Criterion do
     end
   end
 
-  defmacro defstep(description, step_var, where_var, do: block) do
+  defmacro defstep({_fn_name, _line, [_context, _args]} = func, do: block) do
     quote do
-      def step(unquote(description), unquote(step_var), unquote(where_var)) do
+      def unquote(func) do
         unquote(block)
       end
     end
@@ -179,27 +170,28 @@ defmodule Criterion do
   end
 
   defp extract_step(
-         {:step, _line, [step_description | opts]},
+         {:step, _line, [_step_description | opts]},
          _scenario_description
        ) do
     opts = List.flatten(opts)
-    from = opts[:from]
-    where = opts[:where]
-    via = opts[:via]
-    step_description = via || step_description
 
-    if from do
-      quote do
-        fn context ->
-          unquote(from).step(unquote(step_description), context, unquote(where))
+    via = opts[:via]
+    where = opts[:where]
+
+    cond do
+      match?({:&, _, _}, via) ->
+        quote do
+          fn context ->
+            unquote(via).(context, unquote(where))
+          end
         end
-      end
-    else
-      quote do
-        fn context ->
-          step(unquote(step_description), context, unquote(where))
+
+      true ->
+        quote do
+          fn context ->
+            context
+          end
         end
-      end
     end
   end
 end

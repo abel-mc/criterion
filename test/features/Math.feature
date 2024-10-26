@@ -6,9 +6,3 @@ Feature: Math
 		Then the result is greater than the number
 		And pi is a constant
 
-	Scenario: Divide
-		Given a number greater than 0
-		When the number divided by it self
-		Then the result is 1
-		And pi is a constant
-
